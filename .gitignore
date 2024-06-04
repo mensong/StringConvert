@@ -1,0 +1,8 @@
+/Win32
+/x64
+/TestConvertCharset/x64
+/TestConvertCharset/*.txt
+/StringConvert/libuchardet.dir
+/StringConvert/Win32
+/StringConvert/x64
+/.vs

@@ -1,0 +1,6 @@
+[submodule "3rd/uchardet"]
+	path = 3rd/uchardet
+	url = https://github.com/mensong/uchardet-charset-detection.git
+[submodule "3rd/win_iconv"]
+	path = 3rd/win_iconv
+	url = https://github.com/mensong/win_iconv.git
