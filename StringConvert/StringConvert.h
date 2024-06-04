@@ -11,13 +11,14 @@
 #define STRINGCONVERT_API extern "C" __declspec(dllimport)
 #endif
 
-STRINGCONVERT_API void FreeOutStr(char* outStr);
+STRINGCONVERT_API void FreeOutStr(void* outStr);
 
 //获得字符串的字符集
 STRINGCONVERT_API bool DetectCharset(char** outCharset, const char* inStr, size_t inSize);
 
 //不同字符集间的转换
-STRINGCONVERT_API bool ConvertCharset(char** outStr, size_t* outSize, const char* inStr, size_t inSize, const char* toCharset, const char* fromCharset);
+STRINGCONVERT_API bool ConvertCharset(char** outStr, size_t* outSize, const char* inStr, size_t inSize, 
+	const char* fromCharset, const char* toCharset, bool exact = true);
 
 //unicode 转为 ansi
 STRINGCONVERT_API bool Unicode2Ansi(char** outStr, size_t* outSize, const wchar_t* inStr, size_t inSize, const char* locale = "");
@@ -52,9 +53,9 @@ STRINGCONVERT_API bool Base64Decode(char** outStr, size_t* outSize, const char* 
 class StringConvert
 {
 public:
-	typedef void (*FN_FreeOutStr)(char* outStr);
+	typedef void (*FN_FreeOutStr)(void* outStr);
 	typedef bool (*FN_DetectCharset)(char** outCharset, const char* inStr, size_t inSize);
-	typedef bool (*FN_ConvertCharset)(char** outStr, size_t* outSize, const char* inStr, size_t inSize, const char* toCharset, const char* fromCharset);
+	typedef bool (*FN_ConvertCharset)(char** outStr, size_t* outSize, const char* inStr, size_t inSize, const char* fromCharset, const char* toCharset, bool exact/*=true*/);
 	typedef bool (*FN_Unicode2Ansi)(char** outStr, size_t* outSize, const wchar_t* inStr, size_t inSize, const char* locale/* = ""*/);
 	typedef bool (*FN_Ansi2Unicode)(wchar_t** outStr, size_t* outSize, const char* inStr, size_t inSize, const char* locale/* = ""*/);
 	typedef bool (*FN_Unicode2Utf8)(char** outStr, size_t* outSize, const wchar_t* inStr, size_t inSize, const char* locale/* = ""*/);

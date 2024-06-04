@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     char* output = NULL;
     size_t outputLen = 0;
     bool res = StringConvert::Ins().ConvertCharset(&output, &outputLen, &fileContext[0], fileContext.size(), 
-        outputCharset, &charset[0]);
+        &charset[0], outputCharset, true);
     if (!res)
     {
         std::cerr << "Convert charset error" << std::endl;
