@@ -100,5 +100,43 @@ int main()
     }
 
 
+    {
+        char* p64 = NULL;
+        size_t len64 = 0;
+        StringConvert::Ins().Base64Encode(&p64, &len64, p, strlen(p));
+        char* p64_1 = NULL;
+        size_t len64_1 = 0;
+        if (StringConvert::Ins().Base64Decode(&p64_1, &len64_1, p64, len64))
+        {
+            if (strcmp(p64_1, p) == 0)
+                std::cout << "Base64Encode/Base64Decode pass." << std::endl;
+            else
+                std::cerr << "Base64Encode/Base64Decode failed." << std::endl;
+
+            StringConvert::Ins().FreeOutStr(p64_1);
+        }
+        StringConvert::Ins().FreeOutStr(p64);
+    }
+
+    {
+        char* pHex = NULL;
+        size_t hexLen = 0;
+        if (StringConvert::Ins().Str2Hex(&pHex, &hexLen, p, strlen(p)))
+        {
+            char* hs = NULL;
+            size_t hsLen = 0;
+            if (StringConvert::Ins().Hex2Str(&hs, &hsLen, pHex, hexLen))
+            {
+                if (strcmp(hs, p) == 0)
+                    std::cout << "Str2Hex/Hex2Str pass." << std::endl;
+                else
+                    std::cerr << "Str2Hex/Hex2Str failed." << std::endl;
+
+                StringConvert::Ins().FreeOutStr(hs);
+            }
+            StringConvert::Ins().FreeOutStr(pHex);
+        }        
+    }
+
     return 0;
 }
