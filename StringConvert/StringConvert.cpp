@@ -21,6 +21,39 @@ STRINGCONVERT_API void FreeOutStr(void* outStr)
 
 STRINGCONVERT_API bool DetectCharset(char** outCharset, const char* inStr, size_t inSize)
 {
+    size_t outSize = 0;
+
+    //判断是否为UTF-8
+    char* testUtf8 = NULL;
+    size_t testUtf8Len = 0;    
+    bool preReturn = false;    
+    if (Utf82Ansi(&testUtf8, &testUtf8Len, inStr, inSize))
+    {
+        bool isUtf8 = true;
+        //检查两个字符串中的?是否在相同位置，如果不是，则代表Utf82Ansi转换失败
+        for (size_t i = 0; i < testUtf8Len && i < inSize; i++)
+        {
+            if (testUtf8[i] == '?' && inStr[i] != '?')
+            {//不是UTF-8，说明也不是ansi了
+                isUtf8 = false;
+                break;
+            }
+        }
+        if (isUtf8)
+        {
+            if (strcmp(testUtf8, inStr) == 0)
+                CopyMem(outCharset, &outSize, const_cast<char*>("ASCII"), 5);
+            else
+				CopyMem(outCharset, &outSize, const_cast<char*>("UTF-8"), 5);
+            preReturn = true;
+        }        
+    }
+
+    if (testUtf8)
+		FreeOutStr(testUtf8);
+    if (preReturn)
+        return true;
+
 	uchardet_t handle = uchardet_new();
 	int retval = uchardet_handle_data(handle, inStr, inSize);
     if (retval != 0)
@@ -39,7 +72,6 @@ STRINGCONVERT_API bool DetectCharset(char** outCharset, const char* inStr, size_
 
     const char* charset = uchardet_get_encoding(handle, 0);
     
-    size_t outSize = 0;
     CopyMem(outCharset, &outSize, const_cast<char*>(charset), strlen(charset));
 
     uchardet_delete(handle);
