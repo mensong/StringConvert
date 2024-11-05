@@ -54,29 +54,65 @@ STRINGCONVERT_API bool DetectCharset(char** outCharset, const char* inStr, size_
     if (preReturn)
         return true;
 
+    bool res = false;
+
 	uchardet_t handle = uchardet_new();
 	int retval = uchardet_handle_data(handle, inStr, inSize);
-    if (retval != 0)
+    if (retval == 0)
     {
-        uchardet_delete(handle);
-        return false;
+        uchardet_data_end(handle);
+
+        size_t candidates = uchardet_get_n_candidates(handle);
+        if (candidates > 0)
+        {
+            const char* charset = uchardet_get_encoding(handle, 0);
+            CopyMem(outCharset, &outSize, const_cast<char*>(charset), strlen(charset));
+            res = true;
+        }
     }
-    uchardet_data_end(handle);
-
-    size_t candidates = uchardet_get_n_candidates(handle);
-    if (candidates < 1)
-    {
-        uchardet_delete(handle);
-        return false;
-    }
-
-    const char* charset = uchardet_get_encoding(handle, 0);
-    
-    CopyMem(outCharset, &outSize, const_cast<char*>(charset), strlen(charset));
-
     uchardet_delete(handle);
 
-    return true;
+    if (!res)
+    {
+        //test GB18030>GBK>GB2312
+        char* uStr = NULL;
+        size_t uLen = 0;
+        if (ConvertCharset(&uStr, &uLen, inStr, inSize, "GB18030", "UTF-8", true))
+        {
+            char* testGB18030 = NULL;
+            size_t testLen = 0;
+            if (ConvertCharset(&testGB18030, &testLen, uStr, uLen, "UTF-8", "GB18030", true))
+            {
+                if (strcmp(testGB18030, inStr) == 0)
+                {
+					CopyMem(outCharset, &outSize, const_cast<char*>("GB18030"), 7);
+					res = true;
+                }
+                FreeOutStr(testGB18030);
+            }
+            FreeOutStr(uStr);
+        }
+
+        //wchar_t* ws = NULL;
+        //size_t wlen = 0;
+        //if (Ansi2Unicode(&ws, &wlen, inStr, inSize, ""))
+        //{
+        //    char* testAnsi = NULL;
+        //    size_t alen = 0;
+        //    if (Unicode2Ansi(&testAnsi, &alen, ws, wlen, ""))
+        //    {
+        //        if (strcmp(testAnsi, inStr) == 0)
+        //        {
+        //            CopyMem(outCharset, &outSize, const_cast<char*>("ASCII"), 5);
+        //            res = true;
+        //        }
+        //        FreeOutStr(testAnsi);
+        //    }
+        //    FreeOutStr(ws);
+        //}
+    }
+
+    return res;
 }
 
 STRINGCONVERT_API bool ConvertCharset(char** outStr, size_t* outSize, const char* inStr, size_t inSize,
