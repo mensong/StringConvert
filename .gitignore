@@ -9,3 +9,6 @@
 /Test/x64
 /TestConvertCharset/Win32
 /Test/Win32
+/StringConvert/tmp
+/Test/tmp
+/TestConvertCharset/tmp
