@@ -26,7 +26,7 @@ STRINGCONVERT_API bool DetectCharset(char** outCharset, const char* inStr, size_
     //ÅÐ¶ÏÊÇ·ñÎªUTF-8
     char* testUtf8 = NULL;
     size_t testUtf8Len = 0;    
-    bool preReturn = false;    
+    bool res = false;
     if (Utf82Ansi(&testUtf8, &testUtf8Len, inStr, inSize))
     {
         bool isUtf8 = true;
@@ -45,17 +45,35 @@ STRINGCONVERT_API bool DetectCharset(char** outCharset, const char* inStr, size_
                 CopyMem(outCharset, &outSize, const_cast<char*>("ASCII"), 5);
             else
 				CopyMem(outCharset, &outSize, const_cast<char*>("UTF-8"), 5);
-            preReturn = true;
-        }        
-    }
+            res = true;
+        }
 
-    if (testUtf8)
-		FreeOutStr(testUtf8);
-    if (preReturn)
+        FreeOutStr(testUtf8);
+    }
+    if (res)
         return true;
 
-    bool res = false;
-
+    //test GB18030>GBK>GB2312
+    char* uStr = NULL;
+    size_t uLen = 0;
+    if (ConvertCharset(&uStr, &uLen, inStr, inSize, "GB18030", "UTF-8", true))
+    {
+        char* testGB18030 = NULL;
+        size_t testLen = 0;
+        if (ConvertCharset(&testGB18030, &testLen, uStr, uLen, "UTF-8", "GB18030", true))
+        {
+            if (strcmp(testGB18030, inStr) == 0)
+            {
+                CopyMem(outCharset, &outSize, const_cast<char*>("GB18030"), 7);
+                res = true;
+            }
+            FreeOutStr(testGB18030);
+        }
+        FreeOutStr(uStr);
+    }
+    if (res)
+        return true;
+    
 	uchardet_t handle = uchardet_new();
 	int retval = uchardet_handle_data(handle, inStr, inSize);
     if (retval == 0)
@@ -71,46 +89,6 @@ STRINGCONVERT_API bool DetectCharset(char** outCharset, const char* inStr, size_
         }
     }
     uchardet_delete(handle);
-
-    if (!res)
-    {
-        //test GB18030>GBK>GB2312
-        char* uStr = NULL;
-        size_t uLen = 0;
-        if (ConvertCharset(&uStr, &uLen, inStr, inSize, "GB18030", "UTF-8", true))
-        {
-            char* testGB18030 = NULL;
-            size_t testLen = 0;
-            if (ConvertCharset(&testGB18030, &testLen, uStr, uLen, "UTF-8", "GB18030", true))
-            {
-                if (strcmp(testGB18030, inStr) == 0)
-                {
-					CopyMem(outCharset, &outSize, const_cast<char*>("GB18030"), 7);
-					res = true;
-                }
-                FreeOutStr(testGB18030);
-            }
-            FreeOutStr(uStr);
-        }
-
-        //wchar_t* ws = NULL;
-        //size_t wlen = 0;
-        //if (Ansi2Unicode(&ws, &wlen, inStr, inSize, ""))
-        //{
-        //    char* testAnsi = NULL;
-        //    size_t alen = 0;
-        //    if (Unicode2Ansi(&testAnsi, &alen, ws, wlen, ""))
-        //    {
-        //        if (strcmp(testAnsi, inStr) == 0)
-        //        {
-        //            CopyMem(outCharset, &outSize, const_cast<char*>("ASCII"), 5);
-        //            res = true;
-        //        }
-        //        FreeOutStr(testAnsi);
-        //    }
-        //    FreeOutStr(ws);
-        //}
-    }
 
     return res;
 }

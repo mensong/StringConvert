@@ -8,24 +8,28 @@
 int main()
 {
     std::string f;
-    // 创建输入文件流对象  
-    std::ifstream infile("example.txt"); // 替换成你的文件名  
-    std::string line;
-    // 逐行读取文件内容  
-    while (std::getline(infile, line)) 
     {
-        if (f.empty())
-        {
-            f = line;
-        }
-        else
-        {
-            f += '\n';
-            f += line;
-        }
+		// 创建输入文件流对象  
+		std::ifstream infile("example.txt"); // 替换成你的文件名  
+		std::string line;
+		// 逐行读取文件内容  
+		while (std::getline(infile, line))
+		{
+			if (f.empty())
+			{
+				f = line;
+			}
+			else
+			{
+				f += '\n';
+				f += line;
+			}
+		}
+		// 关闭文件  
+		infile.close(); // 可选，析构时会自动关闭  
     }
-    // 关闭文件  
-    infile.close(); // 可选，析构时会自动关闭  
+    if (f.empty())
+        f = "我愛你123abc√";
     const char* p = f.c_str();
 
     {
